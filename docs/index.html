@@ -182,15 +182,20 @@
             </div>
 
             <!-- Install Prompt (PWA) - Initially Hidden -->
-            <div id="installPrompt" class="fixed bottom-4 left-4 right-4 bg-green-600 text-white p-4 rounded-lg shadow-lg hidden">
+            <div id="installPrompt" class="fixed bottom-4 left-4 right-4 bg-green-600 text-white p-4 rounded-xl shadow-2xl hidden">
                 <div class="flex items-center justify-between">
-                    <div>
-                        <h3 class="font-medium">Install App</h3>
-                        <p class="text-sm opacity-90">Add to home screen for quick access</p>
+                    <div class="flex items-center">
+                        <div class="text-2xl mr-3">🌱</div>
+                        <div>
+                            <h3 class="font-semibold">Install Plant Bot</h3>
+                            <p class="text-sm opacity-90">Get the app on your home screen!</p>
+                        </div>
                     </div>
                     <div class="flex space-x-2">
-                        <button onclick="dismissInstallPrompt()" class="text-green-200 hover:text-white">✕</button>
-                        <button onclick="installApp()" class="bg-white text-green-600 px-3 py-1 rounded font-medium">Install</button>
+                        <button onclick="dismissInstallPrompt()" class="text-green-200 hover:text-white text-xl">✕</button>
+                        <button onclick="installApp()" class="bg-white text-green-600 px-4 py-2 rounded-lg font-semibold shadow-md hover:shadow-lg transition-shadow">
+                            Install
+                        </button>
                     </div>
                 </div>
             </div>

@@ -31,7 +31,14 @@ function showInstallPrompt() {
 function installApp() {
     console.log('Install button clicked');
     
-    if (deferredPrompt) {
+    // Check if we're on iOS Safari
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+    
+    if (isIOS && isSafari) {
+        // For iOS Safari, show a simple, clear modal with instructions
+        showIOSInstallModal();
+    } else if (deferredPrompt) {
         console.log('Using deferred prompt');
         deferredPrompt.prompt();
         deferredPrompt.userChoice.then((choiceResult) => {
@@ -46,6 +53,72 @@ function installApp() {
         console.log('No deferred prompt available');
         // Show platform-specific instructions
         showManualInstallInstructions();
+    }
+}
+
+function showIOSInstallModal() {
+    // Remove any existing modal
+    const existingModal = document.getElementById('iosInstallModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Create a clear, focused modal for iOS installation
+    const modal = document.createElement('div');
+    modal.id = 'iosInstallModal';
+    modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4';
+    modal.innerHTML = `
+        <div class="bg-white rounded-xl p-6 max-w-sm w-full shadow-2xl">
+            <div class="text-center mb-4">
+                <div class="text-4xl mb-2">🌱</div>
+                <h2 class="text-xl font-bold text-gray-800">Install Plant Bot</h2>
+            </div>
+            
+            <div class="bg-blue-50 rounded-lg p-4 mb-6">
+                <div class="flex items-start space-x-3">
+                    <div class="text-2xl">📱</div>
+                    <div>
+                        <h3 class="font-semibold text-blue-800 mb-2">Easy Installation:</h3>
+                        <ol class="text-sm text-blue-700 space-y-2">
+                            <li class="flex items-start">
+                                <span class="bg-blue-200 text-blue-800 rounded-full w-5 h-5 text-xs flex items-center justify-center mr-2 mt-0.5 font-bold">1</span>
+                                <span>Tap the <strong>Share icon</strong> at the bottom of your screen (it looks like a box with an arrow pointing up ⬆️)</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="bg-blue-200 text-blue-800 rounded-full w-5 h-5 text-xs flex items-center justify-center mr-2 mt-0.5 font-bold">2</span>
+                                <span>Scroll down and tap <strong>"Add to Home Screen"</strong></span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="bg-blue-200 text-blue-800 rounded-full w-5 h-5 text-xs flex items-center justify-center mr-2 mt-0.5 font-bold">3</span>
+                                <span>Tap <strong>"Add"</strong> in the top right corner</span>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center">
+                <button onclick="closeIOSInstallModal()" class="bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-lg w-full">
+                    Got it! Let me try
+                </button>
+            </div>
+            
+            <div class="text-center mt-3">
+                <p class="text-xs text-gray-500">After installation, you'll have a Plant Bot icon on your home screen!</p>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Auto-close the install prompt since we're showing the modal
+    dismissInstallPrompt();
+}
+
+function closeIOSInstallModal() {
+    const modal = document.getElementById('iosInstallModal');
+    if (modal) {
+        modal.remove();
     }
 }
 
@@ -373,15 +446,18 @@ document.addEventListener('DOMContentLoaded', function() {
         // Check if app is not already installed
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
         const isInstalled = window.navigator.standalone; // iOS Safari
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
         
         console.log('Standalone mode:', isStandalone);
         console.log('iOS installed:', isInstalled);
+        console.log('Is iOS device:', isIOS);
         console.log('Deferred prompt available:', !!deferredPrompt);
         
+        // Show install prompt for iOS Safari users (even without beforeinstallprompt)
         if (!isStandalone && !isInstalled) {
             showInstallPrompt();
         }
-    }, 3000);
+    }, 2000);
 });
 
 // PWA event handlers
