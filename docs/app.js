@@ -13,6 +13,7 @@ let chatHistory = [];
 
 // PWA Install Prompt
 window.addEventListener('beforeinstallprompt', (e) => {
+    console.log('beforeinstallprompt event fired');
     e.preventDefault();
     deferredPrompt = e;
     showInstallPrompt();
@@ -23,19 +24,89 @@ function showInstallPrompt() {
     if (installPrompt) {
         installPrompt.classList.remove('hidden');
         installPrompt.classList.add('install-pulse');
+        console.log('Install prompt shown');
     }
 }
 
 function installApp() {
+    console.log('Install button clicked');
+    
     if (deferredPrompt) {
+        console.log('Using deferred prompt');
         deferredPrompt.prompt();
         deferredPrompt.userChoice.then((choiceResult) => {
+            console.log('User choice:', choiceResult.outcome);
             if (choiceResult.outcome === 'accepted') {
                 console.log('User accepted the install prompt');
             }
             deferredPrompt = null;
             dismissInstallPrompt();
         });
+    } else {
+        console.log('No deferred prompt available');
+        // Show platform-specific instructions
+        showManualInstallInstructions();
+    }
+}
+
+function showManualInstallInstructions() {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isAndroid = /Android/.test(navigator.userAgent);
+    
+    let instructions = '';
+    
+    if (isIOS) {
+        instructions = `
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                <h3 class="font-bold text-blue-800 mb-2">📱 Install on iPhone/iPad:</h3>
+                <ol class="text-sm text-blue-700 space-y-1">
+                    <li>1. Tap the <strong>Share button</strong> (⬆️) at the bottom</li>
+                    <li>2. Scroll down and tap <strong>"Add to Home Screen"</strong></li>
+                    <li>3. Tap <strong>"Add"</strong> in the top right</li>
+                </ol>
+            </div>
+        `;
+    } else if (isAndroid) {
+        instructions = `
+            <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                <h3 class="font-bold text-green-800 mb-2">🤖 Install on Android:</h3>
+                <ol class="text-sm text-green-700 space-y-1">
+                    <li>1. Tap the <strong>menu (⋮)</strong> in Chrome</li>
+                    <li>2. Tap <strong>"Add to Home Screen"</strong></li>
+                    <li>3. Tap <strong>"Add"</strong> to confirm</li>
+                </ol>
+            </div>
+        `;
+    } else {
+        instructions = `
+            <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
+                <h3 class="font-bold text-gray-800 mb-2">💻 Install Instructions:</h3>
+                <p class="text-sm text-gray-700">Look for "Install" or "Add to Home Screen" in your browser menu.</p>
+            </div>
+        `;
+    }
+    
+    // Add instructions to the page
+    const instructionsDiv = document.createElement('div');
+    instructionsDiv.id = 'installInstructions';
+    instructionsDiv.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+    instructionsDiv.innerHTML = `
+        <div class="bg-white rounded-lg p-6 max-w-sm w-full">
+            <h2 class="text-lg font-bold mb-4">Install Home Plant Bot 🌱</h2>
+            ${instructions}
+            <button onclick="closeInstallInstructions()" class="w-full bg-green-600 text-white py-2 px-4 rounded-lg font-medium">
+                Got it!
+            </button>
+        </div>
+    `;
+    
+    document.body.appendChild(instructionsDiv);
+}
+
+function closeInstallInstructions() {
+    const instructionsDiv = document.getElementById('installInstructions');
+    if (instructionsDiv) {
+        instructionsDiv.remove();
     }
 }
 
@@ -297,12 +368,20 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Show install prompt after delay
+    // Show install prompt for browsers that support it
     setTimeout(() => {
-        if (!window.matchMedia('(display-mode: standalone)').matches && !deferredPrompt) {
+        // Check if app is not already installed
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+        const isInstalled = window.navigator.standalone; // iOS Safari
+        
+        console.log('Standalone mode:', isStandalone);
+        console.log('iOS installed:', isInstalled);
+        console.log('Deferred prompt available:', !!deferredPrompt);
+        
+        if (!isStandalone && !isInstalled) {
             showInstallPrompt();
         }
-    }, 5000);
+    }, 3000);
 });
 
 // PWA event handlers
