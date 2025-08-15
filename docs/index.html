@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>Home Plant Bot - AI Plant Care Assistant</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#059669" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Plant Bot" />
+    <meta name="application-name" content="Home Plant Bot" />
+    
+    <!-- Description -->
+    <meta name="description" content="AI-powered plant care assistant. Get instant help with your houseplants, upload photos for diagnosis, and access expert care tips." />
+    <meta name="keywords" content="plants, houseplants, plant care, AI, chatbot, gardening" />
+    
+    <!-- Social Media -->
+    <meta property="og:title" content="Home Plant Bot - AI Plant Care Assistant" />
+    <meta property="og:description" content="AI-powered plant care assistant for your houseplants" />
+    <meta property="og:type" content="website" />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🌱</text></svg>" />
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="./manifest.json" />
+    
+    <!-- CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="./app.css" rel="stylesheet" />
+    
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(registration => console.log('SW registered'))
+                    .catch(error => console.log('SW registration failed'));
+            });
+        }
+    </script>
+</head>
+<body class="font-sans antialiased">
+    <div>
+        <div class="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100">
+            <!-- Header -->
+            <header class="bg-green-600 text-white p-4 shadow-lg">
+                <div class="flex items-center justify-center">
+                    <div class="text-2xl mr-3">🌱</div>
+                    <h1 class="text-xl font-bold">Home Plant Bot</h1>
+                </div>
+            </header>
+
+            <!-- Main Content -->
+            <main class="p-4 pb-20">
+                <!-- Welcome Section -->
+                <div class="bg-white rounded-lg shadow-md p-6 mb-4">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-2">Welcome to your AI Plant Helper! 🌿</h2>
+                    <p class="text-gray-600 text-sm">
+                        Get instant help with your houseplant care. Ask questions, upload photos, and receive expert advice.
+                    </p>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <button 
+                        onclick="startChat()"
+                        class="bg-green-500 hover:bg-green-600 active:bg-green-700 text-white font-medium py-3 px-4 rounded-lg shadow-md transition-colors duration-200 flex items-center justify-center"
+                    >
+                        <span class="mr-2">💬</span>
+                        Ask Bot
+                    </button>
+                    <button 
+                        onclick="showTips()"
+                        class="bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg shadow-md transition-colors duration-200 flex items-center justify-center"
+                    >
+                        <span class="mr-2">💡</span>
+                        Care Tips
+                    </button>
+                </div>
+
+                <!-- Feature Cards -->
+                <div class="space-y-3">
+                    <div class="bg-white rounded-lg p-4 shadow-sm border-l-4 border-green-400">
+                        <h3 class="font-medium text-gray-800 mb-1">🤖 AI Plant Expert</h3>
+                        <p class="text-gray-600 text-sm">Get instant answers to your plant care questions</p>
+                    </div>
+                    <div class="bg-white rounded-lg p-4 shadow-sm border-l-4 border-blue-400">
+                        <h3 class="font-medium text-gray-800 mb-1">📸 Photo Analysis</h3>
+                        <p class="text-gray-600 text-sm">Upload photos for plant problem diagnosis</p>
+                    </div>
+                    <div class="bg-white rounded-lg p-4 shadow-sm border-l-4 border-purple-400">
+                        <h3 class="font-medium text-gray-800 mb-1">📚 Expert Tips</h3>
+                        <p class="text-gray-600 text-sm">Browse our library of plant care guides</p>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Chat Interface (Initially Hidden) -->
+            <div id="chatInterface" class="fixed inset-0 bg-white z-50 hidden">
+                <div class="flex flex-col h-full">
+                    <!-- Chat Header -->
+                    <header class="bg-green-600 text-white p-4 flex items-center shadow-lg">
+                        <button 
+                            onclick="closeChat()"
+                            class="mr-3 p-1 hover:bg-green-700 rounded"
+                        >
+                            ←
+                        </button>
+                        <div class="text-xl mr-3">🌱</div>
+                        <h1 class="text-lg font-bold">Plant Bot Chat</h1>
+                    </header>
+
+                    <!-- Chat Messages -->
+                    <div id="chatMessages" class="flex-1 overflow-y-auto p-4 space-y-3">
+                        <div class="bg-green-100 rounded-lg p-3 max-w-xs">
+                            <p class="text-sm text-gray-800">
+                                Hi! I'm your AI plant expert. How can I help you today? 🌿
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Chat Input -->
+                    <div class="p-4 bg-gray-50 border-t">
+                        <div class="flex space-x-2">
+                            <input 
+                                type="file" 
+                                id="imageInput" 
+                                accept="image/*" 
+                                class="hidden"
+                                onchange="handleImageUpload(this)"
+                            />
+                            <button 
+                                onclick="document.getElementById('imageInput').click()"
+                                class="bg-gray-300 hover:bg-gray-400 p-3 rounded-lg"
+                            >
+                                📷
+                            </button>
+                            <input 
+                                type="text" 
+                                id="messageInput" 
+                                placeholder="Ask about your plants..."
+                                class="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                                onkeypress="if(event.key==='Enter') sendMessage()"
+                            />
+                            <button 
+                                onclick="sendMessage()"
+                                class="bg-green-500 hover:bg-green-600 text-white p-3 rounded-lg"
+                            >
+                                →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tips Interface (Initially Hidden) -->
+            <div id="tipsInterface" class="fixed inset-0 bg-white z-50 hidden">
+                <div class="flex flex-col h-full">
+                    <!-- Tips Header -->
+                    <header class="bg-blue-600 text-white p-4 flex items-center shadow-lg">
+                        <button 
+                            onclick="closeTips()"
+                            class="mr-3 p-1 hover:bg-blue-700 rounded"
+                        >
+                            ←
+                        </button>
+                        <div class="text-xl mr-3">💡</div>
+                        <h1 class="text-lg font-bold">Plant Care Tips</h1>
+                    </header>
+
+                    <!-- Tips Content -->
+                    <div id="tipsContent" class="flex-1 overflow-y-auto p-4">
+                        <div class="text-center py-8">
+                            <div class="text-4xl mb-4">🌿</div>
+                            <p class="text-gray-600">Loading tips...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Install Prompt (PWA) - Initially Hidden -->
+            <div id="installPrompt" class="fixed bottom-4 left-4 right-4 bg-green-600 text-white p-4 rounded-lg shadow-lg hidden">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="font-medium">Install App</h3>
+                        <p class="text-sm opacity-90">Add to home screen for quick access</p>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button onclick="dismissInstallPrompt()" class="text-green-200 hover:text-white">✕</button>
+                        <button onclick="installApp()" class="bg-white text-green-600 px-3 py-1 rounded font-medium">Install</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- JavaScript -->
+    <script src="./app.js"></script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "home-plant-bot-app",
+  "compatibility_date": "2025-08-15",
+  "pages_build_output_dir": "./dist",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  // Environment variables for local development (.dev.vars file)
+  // For production, set these in Cloudflare Pages dashboard
+  "vars": {
+    // Add non-sensitive environment variables here if needed
+  }
+}
